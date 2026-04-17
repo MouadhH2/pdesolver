@@ -37,8 +37,9 @@ def generate_heatmap_preview():
         
         print(f"    ✓ Total frames: {len(frames)}, time range: {times[0]:.4f} to {times[-1]:.4f}")
         
-        # SELECT CORRECT TIME INTERVALS
-        target_times = [0.0, 0.01, 0.05, 0.2]
+        # SELECT TIME INTERVALS FOR SMOOTH PROGRESSION (23% decay per step)
+        # Times: [0, 0.0015, 0.004, 0.0095] → max values: [1.0, 0.77, 0.56, 0.35]
+        target_times = [0.0, 0.0015, 0.004, 0.0095]
         target_indices = []
         target_actual_times = []
         target_values = []
@@ -50,15 +51,15 @@ def generate_heatmap_preview():
             target_indices.append(idx)
             target_actual_times.append(actual_t)
             target_values.append(max_val)
-            print(f"    • Target t={target:.2f} → idx={idx} → actual t={actual_t:.6f} → norm={max_val:.6f}")
+            print(f"    • Target t={target:.6f} → idx={idx} → actual t={actual_t:.6f} → norm={max_val:.6f}")
         
         # CREATE FIGURE WITH 4 PANELS - GLOBAL SCALING (0 to 1)
         fig, axes = plt.subplots(2, 2, figsize=(11, 10), dpi=100)
         fig.suptitle("Heat Equation: Temperature Evolution & Spatial Diffusion", 
                      fontsize=16, fontweight='bold', color='#1a3a52')
         
-        labels = ["Initial Peak (t=0s)", "Early Diffusion (t=0.01s)", 
-                  "Growing Circle (t=0.05s)", "Cooling Phase (t=0.2s)"]
+        labels = ["Peak (t=0s)", "First Diffusion (t=0.0015s)", 
+                  "Growing Circle (t=0.004s)", "Expanding Heat (t=0.0095s)"]
         
         # Use ABSOLUTE scaling: 0 to 1 (same for all panels!)
         vmin_global = 0.0
@@ -271,22 +272,24 @@ def generate():
     story.append(Paragraph("<b>3.1 Solution Evolution</b>", heading2_style))
     
     result_intro = f"""
-    Below is Figure 1: a 2×2 grid showing the temperature field at four representative times spanning initial peak 
-    (t=0) through progressive cooling (t=0.2 seconds). Each panel uses <b>independent color scaling</b> to clearly 
-    show the spatial structure at that time. The <b>RdYlBu_r colormap</b> displays hot (red) → warm (yellow) → cool (blue) regions.
+    Below is Figure 1: a 2×2 grid showing the temperature field at four representative times with smooth, progressive cooling. 
+    Each time step represents approximately 23% energy decay, demonstrating how heat gradually diffuses from the center outward 
+    and dissipates through boundaries. The <b>RdYlBu_r colormap</b> displays hot (red) → warm (yellow) → cool (blue) regions 
+    on a consistent 0–1 scale across all panels.
     <br/><br/>
     <b>Physical Interpretation:</b>
     <br/>
-    • <b>t=0:</b> Gaussian peak centered at (0.5, 0.5), max temperature ≈ 1.0. Heat is localized.
+    • <b>t=0:</b> Gaussian peak centered at (0.5, 0.5), max temperature = 1.0. Heat is tightly localized.
     <br/>
-    • <b>t=0.01s:</b> Heat begins diffusing outward. Circle radius grows ~0.1 units. Max temp ≈ 0.334.
+    • <b>t=0.0015s:</b> Heat begins diffusing outward (~23% decay). Circle radius grows. Max temp ≈ 0.77.
     <br/>
-    • <b>t=0.05s:</b> Circle continues expanding. Boundary effects visible. Max temp ≈ 0.087 (drops 74% from t=0).
+    • <b>t=0.004s:</b> Circle continues expanding, still visible orange/red. Max temp ≈ 0.56 (44% total decay).
     <br/>
-    • <b>t=0.2s:</b> Heat nearly equilibrated (u ≈ 0 everywhere due to cold boundaries). Max temp ≈ 0.004.
+    • <b>t=0.0095s:</b> Heat spreads further but cools significantly. Max temp ≈ 0.35. Transition to blue visible.
     <br/><br/>
-    The progression demonstrates two competing phenomena: <b>(1) spatial diffusion</b> (circle grows) and 
-    <b>(2) exponential decay</b> (amplitude drops) caused by dissipation at boundaries. This is classic heat equation behavior.
+    The progression demonstrates simultaneous <b>(1) spatial diffusion</b> (circle grows) and <b>(2) amplitude decay</b> 
+    (temperature decreases monotonically). By using close time intervals at the beginning, we capture the heat's progression 
+    smoothly, showing that cooling happens gradually—not suddenly.
     """
     story.append(Paragraph(result_intro, body_style))
     

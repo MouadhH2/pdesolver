@@ -52,7 +52,7 @@ def generate_heatmap_preview():
             target_values.append(max_val)
             print(f"    • Target t={target:.2f} → idx={idx} → actual t={actual_t:.6f} → norm={max_val:.6f}")
         
-        # CREATE FIGURE WITH 4 PANELS
+        # CREATE FIGURE WITH 4 PANELS - GLOBAL SCALING (0 to 1)
         fig, axes = plt.subplots(2, 2, figsize=(11, 10), dpi=100)
         fig.suptitle("Heat Equation: Temperature Evolution & Spatial Diffusion", 
                      fontsize=16, fontweight='bold', color='#1a3a52')
@@ -60,17 +60,18 @@ def generate_heatmap_preview():
         labels = ["Initial Peak (t=0s)", "Early Diffusion (t=0.01s)", 
                   "Growing Circle (t=0.05s)", "Cooling Phase (t=0.2s)"]
         
+        # Use ABSOLUTE scaling: 0 to 1 (same for all panels!)
+        vmin_global = 0.0
+        vmax_global = 1.0
+        
         for ax, idx, actual_t, max_v, label in zip(axes.flat, target_indices, 
                                                      target_actual_times, target_values, labels):
             # Reshape to 2D
             frame_2d = frames[idx].reshape(grid.nx, grid.ny)
             
-            # INDEPENDENT SCALING per panel
-            vmin = frame_2d.min()
-            vmax = frame_2d.max()
-            
+            # GLOBAL SCALING per panel (0 to 1)
             im = ax.imshow(frame_2d, cmap='RdYlBu_r', origin='lower', 
-                          extent=[0, 1, 0, 1], vmin=vmin, vmax=vmax)
+                          extent=[0, 1, 0, 1], vmin=vmin_global, vmax=vmax_global)
             ax.set_title(f"{label} | max={max_v:.4f}", fontweight='bold', fontsize=11, color='#2c3e50')
             ax.set_xlabel('x', fontsize=10)
             ax.set_ylabel('y', fontsize=10)
